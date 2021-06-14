@@ -1,13 +1,16 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dating/global/data.dart';
 import 'package:dating/widgets/type-message.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:dating/global/contanst.dart';
 import 'package:dating/widgets/bubble.dart';
 import 'package:dating/widgets/texttile.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 class Chat extends StatefulWidget {
   @override
@@ -143,6 +146,8 @@ class _ChatState extends State<Chat> {
     super.dispose();
   }
 
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -228,80 +233,126 @@ class _ChatState extends State<Chat> {
           )
         ],
       ),
-      body: GestureDetector(
-        onTap: () => _hideFocus(),
-        child: Column(
-          crossAxisAlignment: cstart,
-          children: <Widget>[
-            SizedBox(height: 10),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: chatData.length,
-                  itemBuilder: (BuildContext context, index) => Bubble(
-                    message: chatData[index]['text'],
-                    isMe: chatData[index]['me'],
-                    isSeen: chatData[index]['seen'],
-                    hasImage: chatData[index]['isImage'],
-                    image: chatData[index]['image'],
+      body: StreamBuilder(
+        stream: Firestore.instance
+            .collection("contact")
+            .document('10 june')
+            .collection('messages')
+            .getDocuments()
+            .asStream(),
+        builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+          if (!snapshot.hasData) {
+            return Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CupertinoActivityIndicator(),
+                  SizedBox(height: 10),
+                  Text('Please, wait!!!')
+                ],
+              ),
+            );
+          }
+          print(snapshot.data.documents);
+          return GestureDetector(
+            onTap: () => _hideFocus(),
+            child: Column(
+              crossAxisAlignment: cstart,
+              children: <Widget>[
+                SizedBox(height: 10),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: snapshot.data.documents.length,
+                      itemBuilder: (BuildContext context, index) => Bubble(
+                        time: DateFormat('hh:mm aa').format(DateTime.parse(
+                            snapshot.data.documents[index]['time'].toDate().toString())),
+                        message: snapshot.data.documents[index]['text'],
+                        isMe: chatData[index]['me'],
+                        isSeen: chatData[index]['seen'],
+                        hasImage: chatData[index]['isImage'],
+                        image: chatData[index]['image'],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            SizedBox(height: 8),
-            if (_single && _blocked)
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  margin: EdgeInsets.all(12.0),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          child: TypeMessage(
-                            controller: _messageController,
-                            focusNode: _messageFocusNode,
+                SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    margin: EdgeInsets.all(12.0),
+                    child: Row(
+                      children: <Widget>[
+                        Form(
+                          key: _formKey,
+                          child: Expanded(
+                            child: TypeMessage(
+                              controller: _messageController,
+                              focusNode: _messageFocusNode,
+                            ),
                           ),
                         ),
-                      ),
-                      !_hasMessage
-                          ? InkWell(
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 8.0),
-                                child: CircleAvatar(
-                                  backgroundColor: secondary,
-                                  child: Icon(
-                                    Icons.camera_alt,
-                                    color: white,
+                        !_hasMessage
+                            ? InkWell(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8.0),
+                                  child: CircleAvatar(
+                                    backgroundColor: secondary,
+                                    child: Icon(
+                                      Icons.camera_alt,
+                                      color: white,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              onTap: () {
-                                FocusScope.of(context)
-                                    .requestFocus(new FocusNode());
-                                _showSource(context);
-                              })
-                          : InkWell(
-                              child: Padding(
-                                padding: EdgeInsets.only(left: 8.0),
-                                child: CircleAvatar(
-                                  backgroundColor: secondary,
-                                  child: Icon(
-                                    Icons.send,
-                                    color: white,
+                                onTap: () {
+                                  FocusScope.of(context)
+                                      .requestFocus(new FocusNode());
+                                  _showSource(context);
+                                })
+                            : InkWell(
+                                child: Padding(
+                                  padding: EdgeInsets.only(left: 8.0),
+                                  child: CircleAvatar(
+                                    backgroundColor: secondary,
+                                    child: Icon(
+                                      Icons.send,
+                                      color: white,
+                                    ),
                                   ),
                                 ),
+                                onTap: () {
+                                  final form = _formKey.currentState;
+                                  if (form.validate()) {
+                                    form.save();
+
+                                    Firestore.instance
+                                        .collection("contact")
+                                        .document('10 june')
+                                        .collection('messages')
+                                        .add({
+                                      'text': _messageController.text,
+                                      'sender_id': 'sender uid',
+                                      'sender_name': 'promise',
+                                      'profile_photo': '',
+                                      'image_url': '',
+                                      'me': true,
+                                      'time': FieldValue.serverTimestamp(),
+                                    });
+                                  }
+                                  _messageController.clear();
+                                },
                               ),
-                              onTap: null,
-                            ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-          ],
-        ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

@@ -35,8 +35,7 @@ dependencies:
   # firebase_storage:
   firebase_core: 
   image_picker:
-  
-  flutter_svg: ^0.18.1
+
   flick_video_player:
   flutter_widgets:
   font_awesome_flutter:

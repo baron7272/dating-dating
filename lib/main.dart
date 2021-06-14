@@ -182,15 +182,17 @@ String _link;
           appBarTheme: AppBarTheme(elevation: 0),
         ),
         
-        home: widget.authed
-              ? MainTabs(model: _model)
+        home:
+        // widget.authed
+        //       ?
+        MainTabs(model: _model),
               //   : CreatePassword
               //  (
               //     model: _model,
               //   ),
-              : Login(updateFound: _updateFound,link:_link,
-                  model: _model,
-                ),
+              // : Login(updateFound: _updateFound,link:_link,
+              //     model: _model,
+              //   ),
         routes: {
           "/maintabs": (BuildContext context) => MainTabs(),
           "/filter": (BuildContext context) => Filter(),

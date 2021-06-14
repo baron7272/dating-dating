@@ -107,7 +107,7 @@ class _BubbleState extends State<Bubble> {
     return TextSpan(
       children: [
         TextSpan(
-          text: '11:45am ',
+          text: widget.time,
           style: TextStyle(fontSize: 10, color: grey),
         ),
         widget.isMe
