@@ -12,6 +12,7 @@ class InputField extends StatelessWidget {
    final TextStyle errorTextStyle;
   final Color textColor;
   List inputFormatters;
+  TextEditingController controller;
 
   InputField({
     this.inputFormatters,
@@ -24,6 +25,7 @@ class InputField extends StatelessWidget {
     this.errorTextStyle,
     this.validator,
     this.onSaved,
+    this.controller
   });
 
   @override
@@ -35,6 +37,7 @@ class InputField extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       alignment: Alignment.center,
       child: TextFormField(
+        controller: controller,
          inputFormatters: inputFormatters,
         style: TextStyle(color: textColor, fontSize: 18.0),
         validator: validator,

@@ -63,6 +63,8 @@ dependencies:
   firebase_remote_config: ^0.3.0+1
   wakelock: ^0.1.4+1
   sms_otp_auto_verify:
+  webview_flutter:
+  dio:
 
 flutter_icons:
   image_path: "assets/images/logo.png"

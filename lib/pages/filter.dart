@@ -1,4 +1,5 @@
 import 'package:dating/global/contanst.dart';
+import 'package:dating/pages/payments.dart';
 import 'package:dating/widgets/filter-popup.dart';
 import 'package:dating/widgets/switch-tabs.dart';
 import 'package:flutter/cupertino.dart';
@@ -35,6 +36,10 @@ class _FilterState extends State<Filter> {
         key: _scaffoldkey,
         body: ListView(children: [
           SizedBox(height: 20.0),
+          ListTile(
+            title: Text('Stripe payment'),
+            onTap: ()=> Navigator.push(context, MaterialPageRoute(builder: (context)=> StripePayment())),
+          ),
           SwitchTabs(
             options: switchOptions,
             selectedBackgroundColor: secondary,
